@@ -62,6 +62,12 @@ section{margin:22px 0}section h2{font-size:10px;letter-spacing:.16em;text-transf
 .ptabs{display:flex;gap:4px;margin-bottom:12px}.ptabs button{flex:1;min-height:40px;border:0;border-radius:8px;background:0;color:var(--p-mute)}.ptabs button.on{background:#fff;color:var(--p-ink)}
 .hidden{display:none!important}
 .toast{position:fixed;left:16px;right:16px;bottom:calc(18px + var(--safe));background:var(--ivory);color:var(--ink);text-align:center;padding:12px;border-radius:999px;display:none;z-index:30;font-size:13px}.toast.show{display:block}
+.seg{position:relative;display:grid;grid-template-columns:1fr 1fr;background:var(--chip);border-radius:999px;padding:3px;margin:0 0 12px}
+.seg .knob{position:absolute;top:3px;left:3px;width:calc(50% - 3px);height:calc(100% - 6px);background:#fff;border-radius:999px;box-shadow:0 1px 4px rgba(0,0,0,.12);transition:transform .2s ease}
+.seg.month .knob{transform:translateX(100%)}
+.seg button{position:relative;z-index:1;min-height:40px;border:0;background:0;color:var(--p-mute);font-weight:600}
+.seg button.on{color:var(--p-ink)}
+.addlink{min-height:40px;border:0;background:0;color:var(--rust);padding:0;text-align:left}
 </style>
 </head>
 <body>
@@ -129,12 +135,17 @@ section{margin:22px 0}section h2{font-size:10px;letter-spacing:.16em;text-transf
       <div style="font-size:22px;margin:10px 0 4px">$4,795,000</div>
     </div>
     <div class="paycard">
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
         <b>Pay on this live.link</b>
         <span class="tag plan">planned</span>
       </div>
-      <p class="note">Stripe checkout lives on the published live.link page, not in workspace. Claim $49 or monthly. Split 70 creator / 30 live.link.</p>
-      <button class="btn" type="button" disabled>Claim with Stripe</button>
+      <div class="seg" data-seg="site">
+        <i class="knob"></i>
+        <button class="on" type="button" data-mode="claim">Claim</button>
+        <button type="button" data-mode="month">Monthly</button>
+      </div>
+      <p class="note" id="sitePayNote">One-time claim. Checkout on this live.link page.</p>
+      <button class="btn" type="button" disabled id="sitePayBtn">Claim $49 with Stripe</button>
     </div>
   </section>
 
@@ -159,12 +170,28 @@ section{margin:22px 0}section h2{font-size:10px;letter-spacing:.16em;text-transf
       </div>
     </section>
     <section>
-      <h2>stripe on the published live.link <span class="tag plan">planned</span></h2>
+      <h2>money on this live.link <span class="tag plan">planned</span></h2>
       <div class="card">
-        <p class="note" style="margin:0 0 10px">Payments happen on the live page. Workspace only sets price and mode.</p>
-        <div class="field"><label>Claim price</label><input value="$49"></div>
-        <div class="field"><label>Hold clock</label><select><option>24 hours</option><option>6 hours</option><option>3 days</option><option>Until claimed</option></select></div>
-        <div class="field"><label>Monthly on this live.link</label><input placeholder="off or $ / month"></div>
+        <div class="seg" data-seg="set">
+          <i class="knob"></i>
+          <button class="on" type="button" data-mode="claim">Claim</button>
+          <button type="button" data-mode="month">Monthly</button>
+        </div>
+        <div id="setClaim">
+          <div class="field"><label>Claim price</label><input id="claimPrice" value="$49"></div>
+          <div class="field"><label>Hold clock</label><select id="holdClock"><option>24 hours</option><option>6 hours</option><option>3 days</option><option>7 days</option><option>Until claimed</option></select></div>
+          <p class="note">One-time copy. Claimer edits from their harness. Time runs on the published live.link page.</p>
+        </div>
+        <div id="setMonth" class="hidden">
+          <div class="field"><label>Monthly price</label><input id="monthPrice" placeholder="$19 / month"></div>
+          <button class="addlink" id="addYear" type="button">+ Add yearly discount</button>
+          <div id="yearBox" class="hidden">
+            <div class="field"><label>Yearly price</label><input id="yearPrice" placeholder="$190 / year"></div>
+            <div class="field"><label>Discount</label><select id="yearOff"><option>2 months free</option><option>10% off</option><option>15% off</option><option>20% off</option><option>Custom</option></select></div>
+            <button class="addlink" id="rmYear" type="button">Remove yearly discount</button>
+          </div>
+          <p class="note">Access to this published live.link. Does not transfer ownership.</p>
+        </div>
         <div class="conn"><div class="txt"><b>Payout</b><div class="how">Stripe Connect 70 creator / 30 live.link</div></div><span class="tag plan">planned</span></div>
       </div>
     </section>
@@ -190,8 +217,19 @@ section{margin:22px 0}section h2{font-size:10px;letter-spacing:.16em;text-transf
     <div id="tab-ov">
       <div class="field"><label>Slug</label><input value="chatsworth.live.link" readonly></div>
       <div class="field"><label>Access <span class="tag live">live</span></label><select><option>Anyone</option><option>Recipients</option><option>Only you</option></select></div>
-      <div class="field"><label>Claim with Stripe <span class="tag plan">planned</span></label><input value="$49"></div>
-      <div class="field"><label>Monthly on this live.link <span class="tag plan">planned</span></label><input placeholder="off"></div>
+      <div class="seg" data-seg="pub">
+        <i class="knob"></i>
+        <button class="on" type="button" data-mode="claim">Claim</button>
+        <button type="button" data-mode="month">Monthly</button>
+      </div>
+      <div id="pubClaim">
+        <div class="field"><label>Claim price</label><input value="$49"></div>
+        <div class="field"><label>Hold clock</label><select><option>24 hours</option><option>6 hours</option><option>3 days</option><option>Until claimed</option></select></div>
+      </div>
+      <div id="pubMonth" class="hidden">
+        <div class="field"><label>Monthly price</label><input placeholder="$19 / month"></div>
+        <p class="note">Yearly discount is set in Settings.</p>
+      </div>
       <p class="note">Checkout is on chatsworth.live.link. live.link is not billed here.</p>
       <button class="btn rust" type="button" id="doPub">Publish this version</button>
     </div>
@@ -221,6 +259,21 @@ document.getElementById('sheet').onclick=e=>{if(e.target.id==='sheet')e.currentT
 document.querySelectorAll('.ptabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.ptabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');['ov','dom','set'].forEach(id=>document.getElementById('tab-'+id).classList.toggle('hidden', b.dataset.tab!==id));});
 document.getElementById('doPub').onclick=()=>{toast('Would call existing publish API');document.getElementById('sheet').classList.remove('open');};
 document.querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.classList.toggle('on'));
+function setMode(mode){
+  document.querySelectorAll('.seg').forEach(seg=>{
+    seg.classList.toggle('month', mode==='month');
+    seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.mode===mode));
+  });
+  document.getElementById('setClaim').classList.toggle('hidden', mode!=='claim');
+  document.getElementById('setMonth').classList.toggle('hidden', mode!=='month');
+  document.getElementById('pubClaim').classList.toggle('hidden', mode!=='claim');
+  document.getElementById('pubMonth').classList.toggle('hidden', mode!=='month');
+  document.getElementById('sitePayNote').textContent=mode==='claim'?'One-time claim. Checkout on this live.link page.':'Monthly access on this live.link page.';
+  document.getElementById('sitePayBtn').textContent=mode==='claim'?'Claim $49 with Stripe':'Subscribe with Stripe';
+}
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+document.getElementById('addYear').onclick=()=>{document.getElementById('yearBox').classList.remove('hidden');document.getElementById('addYear').classList.add('hidden');};
+document.getElementById('rmYear').onclick=()=>{document.getElementById('yearBox').classList.add('hidden');document.getElementById('addYear').classList.remove('hidden');};
 </script>
 </body>
 </html>
